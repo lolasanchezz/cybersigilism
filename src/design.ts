@@ -6,7 +6,7 @@ import init, { p5SVG } from 'p5-svg';
 import { off } from 'process';
 
 const renderSvg = false;
-
+type point = [number, number]
 renderSvg && init(p5);
 
 const mousePos = new p5.Vector(0, 0);
@@ -29,11 +29,15 @@ export const design = (p5: p5SVG) => {
 
   p5.draw = () => {
     p5.background(30);
-
+        p5.strokeWeight(1)
+    p5.textSize(100)
+    p5.text(`${mousePos.x}, ${mousePos.y}`,
+        mousePos.x, mousePos.y)
     p5.stroke('#ed225d');
     p5.strokeWeight(4)
     const points = bezierCurve(
-      400,500,430,475
+      [600, 100],[1200,1100],
+      [430,430],[1100,700]
     )
     points.forEach(([x, y]) => {
       p5.point(x, y);
@@ -47,14 +51,12 @@ export const design = (p5: p5SVG) => {
 
 
 function bezierCurve(
-  start: number,
-  end: number,
-  mid1: number,
-  mid2: number,
+  start: point,
+  end: point,
+  mid1: point,
+  mid2: point,
   numberOfPoints: number = 100,
-  xStart:number = 300,
-  width: number = 900,
-  offset: number = 50
+  
 ): number[][]  {
 
   let points = []
@@ -62,13 +64,19 @@ function bezierCurve(
   for (let i = 0; i < numberOfPoints; i++) {
     const t = i / numberOfPoints
     const p = 1 - t
-    const point = 
-    (p**3 * start) + 
-    (3 * p**2 * t * mid1) +
-    (3 * p * t**2 * mid2) +
-    p**3 * end
+    
+    const x = 
+    (p**3 * start[0]) + 
+    (3 * p**2 * t * mid1[0]) +
+    (3 * p * t**2 * mid2[0]) +
+    t**3 * end[0]
+    const y = 
+    (p**3 * start[1]) + 
+    (3 * p**2 * t * mid1[1]) +
+    (3 * p * t**2 * mid2[1]) +
+    t**3 * end[1]
 
-    points.push([xStart + t * width, point + offset])
+    points.push([x,y])
 
   }
 return points;
