@@ -3,6 +3,7 @@ import p5, {
   Renderer,
 } from 'p5';
 import init, { p5SVG } from 'p5-svg';
+import { off } from 'process';
 
 const renderSvg = false;
 
@@ -32,7 +33,7 @@ export const design = (p5: p5SVG) => {
     p5.stroke('#ed225d');
     p5.strokeWeight(4)
     const points = bezierCurve(
-      400,500,430,475,100
+      400,500,430,475
     )
     points.forEach(([x, y]) => {
       p5.point(x, y);
@@ -50,9 +51,10 @@ function bezierCurve(
   end: number,
   mid1: number,
   mid2: number,
-  numberOfPoints: number,
-  xStart:number = 200,
-  width: number = 600,
+  numberOfPoints: number = 100,
+  xStart:number = 300,
+  width: number = 900,
+  offset: number = 50
 ): number[][]  {
 
   let points = []
@@ -66,7 +68,7 @@ function bezierCurve(
     (3 * p * t**2 * mid2) +
     p**3 * end
 
-    points.push([xStart + t * width, point])
+    points.push([xStart + t * width, point + offset])
 
   }
 return points;
