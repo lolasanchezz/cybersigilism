@@ -4,7 +4,7 @@ import p5, {
 } from 'p5';
 import init, { p5SVG } from 'p5-svg';
 import { off } from 'process';
-
+import {sqrt} from 'mathjs'
 const renderSvg = false;
 type point = [number, number]
 renderSvg && init(p5);
@@ -42,7 +42,11 @@ export const design = (p5: p5SVG) => {
     points.forEach(([x, y]) => {
       p5.point(x, y);
     });
-    console.log(points)
+    const pts = halfCircle([600,100], 50, 50, 100).forEach(([x,y]) => {
+      p5.point(x,y)
+    }
+    )
+    
     
     p5.stroke(255);
     
@@ -81,6 +85,32 @@ function bezierCurve(
   }
 return points;
 
+
+}
+
+
+function halfCircle(
+  start: point,
+  width: number,
+  height: number,
+  numberOfPoints: number
+): point[] {
+
+  let points: point[] = []
+  const endPoint = [start[0] + width, start[1]]
+  const step = (start[0] + width)/numberOfPoints
+  const midpoint = [start[0] + (width / 2), start[1] + height]
+  // y = (1 - (x^2 / a^2)) * b^2
+  for (let i = start[0]; i < endPoint[0]; i+= step) {
+  const x = i;
+
+ 
+  const y = sqrt((1 - ((x ** 2) / (midpoint[1]) ** 2)) * midpoint[0] ** 2)
+    console.log(x)
+  points.push([x,y as number]) 
+  }
+  return points
+ 
 
 }
 
