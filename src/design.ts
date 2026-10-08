@@ -162,39 +162,14 @@ function funkyCurve(start: point, end: point) {
   const mid2 = [randomInt(start[0], end[0]),randomInt(start[1], end[1])] as point
   const numOfPts = 50
   const pts = bezierCurve(start,end,minBetweenPts(mid1, mid2, start),minBetweenPts(mid1, mid2, end), numOfPts)
+  const phi = Math.atan2(end[1] - mid2[1], end[0] - mid2[0])
   const lastFewPoints = pts.slice(numOfPts/2,numOfPts)
 
   const derivative = getDerivative(lastFewPoints)
-
+  const numOfPtsForCircle=10
+  let circlePts = halfCircleWithPoints(end, 200, 100, numOfPtsForCircle, phi + Math.PI / 2);
   
-  let angle = 90;
-  console.log(derivative)
-  const numOfPtsForCircle = 10;
-  let circlePts = halfCircleWithPoints(end, 150, 50, numOfPtsForCircle, angle);
-  const range = 0.2
-  let newDerivative = 0
-  let iterations = 0
-  while (true) {
-    if (iterations > 1000) break
-    iterations+=1
-    const lastFewPoints = circlePts.slice(0, numOfPts)
-    newDerivative = getDerivative(lastFewPoints)
-    console.log(lastFewPoints)
-    const dif = newDerivative-derivative
-    console.log(dif)
-    if ((dif > -0.2) && (dif < 0.2)) {
-      break
-    } else if (dif > 0.2) {
-      angle = angle - 5
-   
-    } else {
-      angle = angle + 5
 
-    }
-    circlePts = halfCircleWithPoints(end, 150, 50, numOfPtsForCircle, angle);
-  }
-
-  console.log(iterations)
 
 
   return [...bezierCurve(start, end, minBetweenPts(mid1, mid2, start), minBetweenPts(mid1, mid2, end), 50), 
