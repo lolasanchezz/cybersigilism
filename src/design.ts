@@ -49,10 +49,12 @@ export const design = (p5: p5SVG) => {
   }
 
   function slider(label: string, key: keyof params, min: number, max: number, step: number = 1) {
-    const slider = p5.createSlider(min, max, params[key], step)
-    params[key] = Number(slider.value())
+    const wrapper = p5.createDiv().style('display', 'inline-block')
+      const slider = p5.createSlider(min, max, params[key], step).parent(wrapper)
+    const caption = p5.createDiv(`${label} = ${params[key]}`).parent(wrapper)
     slider.changed(() => {
       params[key] = Number(slider.value())
+      caption.html(`${label} = ${params[key]}`)
       p5.redraw()
     })
   }
