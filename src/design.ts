@@ -1,24 +1,81 @@
 import { number } from 'mathjs';
 import p5, {
   Renderer,
+  
 } from 'p5';
 import init, { p5SVG } from 'p5-svg';
 import { off } from 'process';
 import {sqrt, pi, cos, sin, randomInt} from 'mathjs'
+import { start } from 'repl';
+
+type params = {
+startX: number
+startY: number
+endX: number
+endY: number
+startPercentage: number
+endPercentage: number
+lengthXlowerBound: number
+lengthXhighBound: number
+lengthYlowerBound: number
+lengthYhighBound: number
+outerLoop: number
+innerLoop: number
+}
+
+function addSlider(label: string, key: string, min: number, max: number, step = 1) {
+  const slider = p5.createSlider()
+}
 
 const renderSvg = false;
 type point = [number, number]
 renderSvg && init(p5);
-
+ let startX = 600
+    let startY = 100
+    let endX = 1000
+    let endY = 1000
 const mousePos = new p5.Vector(0, 0);
 
 export const design = (p5: p5SVG) => {
+  const params: params = {
+    startX: 600, startY: 600, endX: 1000, endY: 1000,
+    startPercentage: 0.125, endPercentage: 0.75, 
+    lengthXlowerBound:100,
+    lengthXhighBound:700,
+    lengthYlowerBound:100,
+    lengthYhighBound:300,
+    outerLoop: 75,
+    innerLoop: 50
+  }
+
+  function slider(label: string, key: keyof params, min: number, max: number, step: number = 1) {
+    const slider = p5.createSlider(min, max, params[key], step)
+    params[key] = Number(slider.value())
+    slider.changed(() => {
+      params[key] = Number(slider.value())
+      p5.redraw()
+    })
+  }
+
+
   p5.setup = () => {
     const cnv = p5.createCanvas(1600, 1200, p5.SVG) as unknown as Renderer;
-    p5.noLoop();
     p5.noFill();
-
+    p5.noLoop()
     renderSvg && p5.noLoop();
+
+    slider('start x', 'startX', 0, 1000)
+    slider('start y', 'startY', 0, 1000)
+    slider('end x', 'endX',  0, 1600)
+    slider('end x', 'endY', 0, 1600)
+    slider('start %', 'startPercentage', 0, 1, 0.01)
+    slider('end %', 'endPercentage', 0, 1, 0.01)
+    slider('length x low', 'lengthXlowerBound', 0, 1000)
+    slider('length x high', 'lengthXhighBound', 0, 1000)
+    slider('length y low', 'lengthYlowerBound',  0, 1000)
+    slider('length y high', 'lengthYhighBound',  0, 1000)
+    slider('outer loop', 'outerLoop', 1, 125)
+    slider('inner loop', 'innerLoop', 1, 150)
 
     cnv.mouseMoved(
       () => {
@@ -29,27 +86,40 @@ export const design = (p5: p5SVG) => {
   };
 
   p5.draw = () => {
+   
     p5.background(30);
         p5.strokeWeight(1)
-    p5.textSize(100)
-    p5.text(`${mousePos.x}, ${mousePos.y}`,
-        mousePos.x, mousePos.y)
-    p5.stroke('#ed225d');
-    p5.strokeWeight(4)
-    /*
-    const points = bezierCurve(
-      [600, 100],[1200,1100],
-      [430,430],[1100,700]
-    )
-    points.forEach(([x, y]) => {
-      p5.point(x, y);
-    });
-    */
-    const pts = funkyCurve([600,100], [1000,1000]).forEach(([x,y]) => {
-      p5.point(x,y)
-    }
-    )
+   
+    p5.stroke('#fff1f5');
+    p5.strokeWeight(1)
+   
+    let pts = funkyCurve([startX,startY], [endX,endY]);
+    pts.forEach(([x,y]) => {p5.point(x,y)})
+    let randomStartPoint = pts[
+      randomInt(pts.length * params.startPercentage, (pts.length*params.endPercentage))
+    ]
     
+    for (let i = 0; i < 75; i++) {
+      console.log("E")
+     randomStartPoint = pts[
+      randomInt(pts.length/8, (pts.length*3/4))
+    ]
+    
+      for (let j = 0; j < params.outerLoop; j++) {
+        let lengthX = randomInt(params.lengthXlowerBound,params.lengthXhighBound)
+        if (randomInt(0,10) > 5) {lengthX = lengthX*-1}
+        let lengthY = randomInt(params.lengthYlowerBound,params.lengthYhighBound)
+        if (randomInt(0,10) > 5) {lengthY = lengthY*-1}
+
+        let end = [randomStartPoint[0] + lengthX, randomStartPoint[1] + lengthY] as point
+        let pts = funkyCurve(randomStartPoint, end, false);
+        pts.forEach(([x,y]) => {p5.point(x,y)})
+      }
+    }
+    
+
+    startX += 1
+    endX +=1
     
     p5.stroke(255);
     
@@ -157,25 +227,38 @@ function getDerivative(pts: point[]): number{
 }
 
 
-function funkyCurve(start: point, end: point) {
+function funkyCurve(start: point, end: point, topCircle: boolean = false) {
   const mid1 = [randomInt(start[0], end[0]),randomInt(start[1], end[1])] as point
   const mid2 = [randomInt(start[0], end[0]),randomInt(start[1], end[1])] as point
   const numOfPts = 50
   const pts = bezierCurve(start,end,minBetweenPts(mid1, mid2, start),minBetweenPts(mid1, mid2, end), numOfPts)
   const phi = Math.atan2(end[1] - mid2[1], end[0] - mid2[0])
   const lastFewPoints = pts.slice(numOfPts/2,numOfPts)
+    const psi = Math.atan2(start[1] - mid1[1], start[0] - mid1[0])
 
-  const derivative = getDerivative(lastFewPoints)
-  const numOfPtsForCircle=10
+    const numOfPtsForCircle=10
   let circlePts = halfCircleWithPoints(end, 200, 100, numOfPtsForCircle, phi + Math.PI / 2);
+  
+  if (topCircle) {
+    
+    const top = halfCircleWithPoints(start, 200, 200, 10, psi + Math.PI / 2).reverse()
+    return [...top, ...bezierCurve(start, end, minBetweenPts(mid1, mid2, start), minBetweenPts(mid1, mid2, end), 50), 
+    ...circlePts
+  ] 
+  } else {
+    return [...bezierCurve(start, end, minBetweenPts(mid1, mid2, start), minBetweenPts(mid1, mid2, end), numOfPts), 
+    ...circlePts
+  ] 
+  }
+
+ 
+
+
+
+
   
 
 
 
-  return [...bezierCurve(start, end, minBetweenPts(mid1, mid2, start), minBetweenPts(mid1, mid2, end), 50), 
-    ...circlePts
-  ] 
-
-
-
 }
+
