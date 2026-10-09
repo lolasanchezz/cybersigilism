@@ -11,7 +11,7 @@ this was it like two days ago
 
 
 with some settings messed around. what is it??
-![harp]("./harp.png")
+![harp](./harp.png)
 
 
 this was what i wanted originally
