@@ -41,6 +41,7 @@ const logReadyPlugin: Plugin = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/cybersigilism',
   plugins: [
     vue(),
     fullReloadAlways,
@@ -50,3 +51,4 @@ export default defineConfig({
     logReadyPlugin,
   ],
 });
+

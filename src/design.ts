@@ -4,9 +4,7 @@ import p5, {
   
 } from 'p5';
 import init, { p5SVG } from 'p5-svg';
-import { off } from 'process';
 import {sqrt, pi, cos, sin, randomInt} from 'mathjs'
-import { start } from 'repl';
 
 type params = {
 startX: number
@@ -23,9 +21,7 @@ outerLoop: number
 innerLoop: number
 }
 
-function addSlider(label: string, key: string, min: number, max: number, step = 1) {
-  const slider = p5.createSlider()
-}
+
 
 const renderSvg = false;
 type point = [number, number]
@@ -50,7 +46,9 @@ export const design = (p5: p5SVG) => {
 
   function slider(label: string, key: keyof params, min: number, max: number, step: number = 1) {
     const wrapper = p5.createDiv().style('display', 'inline-block')
-      const slider = p5.createSlider(min, max, params[key], step).parent(wrapper)
+      const slider = p5.createSlider(min, max, params[key], step).parent(wrapper) as p5.Element & {
+        changed(callback: () => void): void
+      }
     const caption = p5.createDiv(`${label} = ${params[key]}`).parent(wrapper)
     slider.changed(() => {
       params[key] = Number(slider.value())
